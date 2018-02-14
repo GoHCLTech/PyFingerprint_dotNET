@@ -1,4 +1,4 @@
-# .NET library for ZFM-20 fingerprint sensor
+# .NET library for ZhianTec fingerprint sensors
 
 The PyFingerprint_dotNET library allows the use of ZhianTec fingerprint sensors on Windows Machines.
 
