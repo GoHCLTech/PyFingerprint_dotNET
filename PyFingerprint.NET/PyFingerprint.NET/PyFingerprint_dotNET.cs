@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
 
@@ -675,11 +676,67 @@ namespace PyFingerprint_dotNET
         /// <summary>
         /// Download the image of a finger to host computer.
         /// </summary>
-        /// <param name="imageDestination"></param>
+        /// <param name="imageDestination">Filepath for saved image</param>
         public void downloadImage(string imageDestination)
         {
-            //Need to determine how to save images
-            throw new NotImplementedException();
+            List<byte> packetPayload = new List<byte>() { FINGERPRINT_DOWNLOADIMAGE };
+
+            writePacket(FINGERPRINT_COMMANDPACKET, packetPayload);
+            var recievedPacket = readPacket();
+
+            byte receivedPacketType = recievedPacket.Item1;
+            List<byte> receivedPacketPayload = recievedPacket.Item2;
+
+            if (receivedPacketType != FINGERPRINT_ACKPACKET)
+            {
+                throw new Exception("The received packet is no ack packet!");
+            }
+
+            switch (receivedPacketPayload[0])
+            {
+                case FINGERPRINT_OK:
+                    break;
+
+                case FINGERPRINT_ERROR_COMMUNICATION:
+                    throw new Exception("Communication error");
+
+                case FINGERPRINT_ERROR_DOWNLOADIMAGE:
+                    throw new Exception("Could not download image");
+
+                default:
+                    throw new Exception("Unknown error " + receivedPacketPayload[0].ToString("X"));
+            }
+
+            //Bitmap img = new Bitmap(256, 258);
+            ////Graphics gfx = Graphics.FromImage(img);
+
+            //// Y coordinate of current pixe
+            //int line = 0;
+
+            //while (receivedPacketType != FINGERPRINT_ENDDATAPACKET)
+            //{
+            //    receivedPacketType = recievedPacket.Item1;
+            //    receivedPacketPayload = recievedPacket.Item2;
+
+            //    if (receivedPacketType != FINGERPRINT_DATAPACKET && receivedPacketType != FINGERPRINT_ENDDATAPACKET)
+            //    {
+            //        throw new Exception("The received packet is not a data packet!");
+            //    }
+
+            //    // X coordinate of current pixel
+            //    int x = 0;
+
+            //    foreach (byte _byte in receivedPacketPayload)
+            //    {
+            //        Color pixel = new Color();
+            //        pixel.
+            //        img.SetPixel(x, line, Color.Black);
+            //    }
+
+            //    line++;
+            //}
+
+            //img.Save(imageDestination);
         }
 
         /// <summary>
