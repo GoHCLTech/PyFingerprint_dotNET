@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO.Ports;
 using System.Linq;
 
@@ -674,10 +675,9 @@ namespace PyFingerprint_dotNET
         //Look into implementing uploadImage()
 
         /// <summary>
-        /// Download the image of a finger to host computer.
+        /// Returns the image of a scanned finger.
         /// </summary>
-        /// <param name="imageDestination">Filepath for saved image</param>
-        public void downloadImage(string imageDestination)
+        public Bitmap downloadImage()
         {
             List<byte> packetPayload = new List<byte>() { FINGERPRINT_DOWNLOADIMAGE };
 
@@ -707,36 +707,42 @@ namespace PyFingerprint_dotNET
                     throw new Exception("Unknown error " + receivedPacketPayload[0].ToString("X"));
             }
 
-            //Bitmap img = new Bitmap(256, 258);
-            ////Graphics gfx = Graphics.FromImage(img);
+            Bitmap img = new Bitmap(256, 258, PixelFormat.Format8bppIndexed);
+            //Graphics gfx = Graphics.FromImage(img);
 
-            //// Y coordinate of current pixe
-            //int line = 0;
+            // Y coordinate of current pixe
+            int y = 0;
 
-            //while (receivedPacketType != FINGERPRINT_ENDDATAPACKET)
-            //{
-            //    receivedPacketType = recievedPacket.Item1;
-            //    receivedPacketPayload = recievedPacket.Item2;
+            while (receivedPacketType != FINGERPRINT_ENDDATAPACKET)
+            {
+                receivedPacketType = recievedPacket.Item1;
+                receivedPacketPayload = recievedPacket.Item2;
 
-            //    if (receivedPacketType != FINGERPRINT_DATAPACKET && receivedPacketType != FINGERPRINT_ENDDATAPACKET)
-            //    {
-            //        throw new Exception("The received packet is not a data packet!");
-            //    }
+                if (receivedPacketType != FINGERPRINT_DATAPACKET && receivedPacketType != FINGERPRINT_ENDDATAPACKET)
+                {
+                    throw new Exception("The received packet is not a data packet!");
+                }
 
-            //    // X coordinate of current pixel
-            //    int x = 0;
+                // X coordinate of current pixel
+                int x = 0;
 
-            //    foreach (byte _byte in receivedPacketPayload)
-            //    {
-            //        Color pixel = new Color();
-            //        pixel.
-            //        img.SetPixel(x, line, Color.Black);
-            //    }
+                foreach (byte _byte in receivedPacketPayload)
+                {
+                    // Draw left 4 Bits one byte of package
+                    string color = ((_byte >> 4) * 17).ToString("X");
+                    img.SetPixel(x, y, ColorTranslator.FromHtml(color));
+                    x++;
 
-            //    line++;
-            //}
+                    // Draw right 4 Bits one byte of package
+                    color = ((_byte & 15) * 17).ToString("X");
+                    img.SetPixel(x, y, ColorTranslator.FromHtml(color));
+                    x++;
+                }
 
-            //img.Save(imageDestination);
+                y++;
+            }
+
+            return img;
         }
 
         /// <summary>
