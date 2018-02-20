@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace PyFingerprint_dotNET
 {
-    public class PyFingerprint_dotNET :IDisposable
+    public class PyFingerprintScanner :IDisposable
     {
         #region "Constants"
         //Baotou start byte
@@ -107,7 +107,7 @@ namespace PyFingerprint_dotNET
         uint __password;
         SerialPort __serial;
 
-        public PyFingerprint_dotNET(string port = "COM3", int baudRate = 57600, uint address = 0xFFFFFFFF, uint password = 0x00000000)
+        public PyFingerprintScanner(string port = "COM3", int baudRate = 57600, uint address = 0xFFFFFFFF, uint password = 0x00000000)
         {
             if (!SerialPort.GetPortNames().Contains(port))
             {

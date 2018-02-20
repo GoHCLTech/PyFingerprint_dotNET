@@ -9,7 +9,7 @@ namespace PyFingerprint_dotNET.Examples
         {
             try
             {
-                using (PyFingerprint_dotNET scanner = new PyFingerprint_dotNET())
+                using (PyFingerprintScanner scanner = new PyFingerprintScanner())
                 {
                     if (!scanner.verifyPassword())
                     {
@@ -82,7 +82,7 @@ namespace PyFingerprint_dotNET.Examples
         {
             try
             {
-                using (PyFingerprint_dotNET scanner = new PyFingerprint_dotNET())
+                using (PyFingerprintScanner scanner = new PyFingerprintScanner())
                 {
                     if (!scanner.verifyPassword())
                     {
