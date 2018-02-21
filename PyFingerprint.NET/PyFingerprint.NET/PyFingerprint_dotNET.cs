@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace PyFingerprint_dotNET
 {
@@ -675,9 +679,10 @@ namespace PyFingerprint_dotNET
         //Look into implementing uploadImage()
 
         /// <summary>
-        /// Returns the image of a scanned finger.
+        /// Saves a scanned finger at the given directory
         /// </summary>
-        public Bitmap downloadImage()
+        /// <param name="directory"></param>
+        public void downloadImage(string directory)
         {
             List<byte> packetPayload = new List<byte>() { FINGERPRINT_DOWNLOADIMAGE };
 
@@ -707,42 +712,46 @@ namespace PyFingerprint_dotNET
                     throw new Exception("Unknown error " + receivedPacketPayload[0].ToString("X"));
             }
 
-            Bitmap img = new Bitmap(256, 258, PixelFormat.Format8bppIndexed);
-            //Graphics gfx = Graphics.FromImage(img);
-
-            // Y coordinate of current pixe
+            List<byte> buffer = new List<byte>();
             int y = 0;
+            int x = 0;
 
             while (receivedPacketType != FINGERPRINT_ENDDATAPACKET)
             {
+                recievedPacket = readPacket();
                 receivedPacketType = recievedPacket.Item1;
                 receivedPacketPayload = recievedPacket.Item2;
 
                 if (receivedPacketType != FINGERPRINT_DATAPACKET && receivedPacketType != FINGERPRINT_ENDDATAPACKET)
                 {
                     throw new Exception("The received packet is not a data packet!");
-                }
-
-                // X coordinate of current pixel
-                int x = 0;
+                }                
 
                 foreach (byte _byte in receivedPacketPayload)
                 {
-                    // Draw left 4 Bits one byte of package
-                    string color = ((_byte >> 4) * 17).ToString("X");
-                    img.SetPixel(x, y, ColorTranslator.FromHtml(color));
+                    buffer.Add((byte)((_byte >> 4) * 17));
                     x++;
 
-                    // Draw right 4 Bits one byte of package
-                    color = ((_byte & 15) * 17).ToString("X");
-                    img.SetPixel(x, y, ColorTranslator.FromHtml(color));
+                    buffer.Add((byte)((_byte & 15) * 17));
                     x++;
                 }
 
                 y++;
             }
+            x = x / y;
 
-            return img;
+            WriteableBitmap wbm = new WriteableBitmap(x, y, 96, 96, PixelFormats.Gray8, null);
+            wbm.WritePixels(new Int32Rect(0, 0, x, y), buffer.ToArray(), x, 0);
+
+            // Look for way to return a usable bitmap (image is unusable/unsavable after memorystream is disposed)
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create((BitmapSource)wbm));
+                enc.Save(outStream);
+                Bitmap img = new Bitmap(outStream);
+                img.Save(directory, ImageFormat.Bmp);
+            }
         }
 
         /// <summary>
