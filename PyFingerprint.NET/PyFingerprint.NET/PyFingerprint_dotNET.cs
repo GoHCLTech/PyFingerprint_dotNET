@@ -862,9 +862,10 @@ namespace PyFingerprint_dotNET
                     foreach (int i in Enumerable.Range(0, templateIndex.Count))
                     {
                         // Index not used?
-                        if (!templateIndex[1])
+                        if (!templateIndex[i])
                         {
                             positionNumber = (Int16)((templateIndex.Count * page) + i);
+                            break;
                         }
                     }
                 }
