@@ -183,7 +183,7 @@ namespace PyFingerprint_dotNET
         /// <param name="n"></param>
         /// <param name="p"></param>
         /// <returns></returns>
-        private int bitAtPosition(uint n, int p)
+        private bool bitAtPosition(uint n, int p)
         {
             // A bitshift 2 ^ p
             uint twoP = (uint)(1 << p);
@@ -192,11 +192,11 @@ namespace PyFingerprint_dotNET
             // This can only happen at position p
             if ((n & twoP) > 0)
             {
-                return 1;
+                return true;
             }
             else
             {
-                return 0;
+                return false;
             }
         }
 
@@ -583,15 +583,15 @@ namespace PyFingerprint_dotNET
                     List<bool> templateIndex = new List<bool>();
 
                     // Contains the table page bytes (skip the first status byte)
-                    byte pageElements = receivedPacketPayload[2];
+                    receivedPacketPayload.RemoveAt(0);
+                    var pageElements = receivedPacketPayload;
 
-                    foreach (var pageElement in pageElements.ToString())
+                    foreach (byte pageElement in pageElements)
                     {
                         // Test every bit (bit = template position is used indicator) of a table page element
-                        foreach (int p in Enumerable.Range(0, 7 + 1))
+                        foreach (int i in Enumerable.Range(0, 7))
                         {
-                            bool positionIsUsed = bitAtPosition(pageElement, p) == 1;
-                            templateIndex.Add(positionIsUsed);
+                            templateIndex.Add(bitAtPosition(pageElement, i));
                         }
                     }
 
