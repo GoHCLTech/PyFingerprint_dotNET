@@ -589,7 +589,7 @@ namespace PyFingerprint_dotNET
                     foreach (byte pageElement in pageElements)
                     {
                         // Test every bit (bit = template position is used indicator) of a table page element
-                        foreach (int i in Enumerable.Range(0, 7))
+                        foreach (int i in Enumerable.Range(0, 8))
                         {
                             templateIndex.Add(bitAtPosition(pageElement, i));
                         }
